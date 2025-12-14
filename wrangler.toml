@@ -1,0 +1,8 @@
+name = "yworkouty"
+account_id = "0ae949d229d9cc0aacd580a49bcc15ca"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# OpenNext output directory
+main = ".open-next/worker.js"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }

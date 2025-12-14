@@ -1,64 +1,128 @@
-import Image from "next/image";
+import { Header } from "@/components/Header";
+import { BODY_PARTS, BodyPart, EXERCISES } from "@/lib/exercises";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+// 部位別のカラー設定
+const BODY_PART_COLORS: Record<BodyPart, string> = {
+  chest: "bg-red-500",
+  back: "bg-blue-500",
+  arms: "bg-green-500",
+  shoulders: "bg-yellow-500",
+  legs: "bg-purple-500",
+  core: "bg-orange-500",
+};
+
+async function getHeatmapData() {
+  const supabase = await createClient();
+  
+  // 過去90日分のデータを取得（全ユーザー分を公開表示）
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  
+  const { data: logs } = await supabase
+    .from("training_logs")
+    .select("date, exercise_id, sets")
+    .gte("date", ninetyDaysAgo.toISOString().split("T")[0]);
+  
+  // 部位ごとに日付別のセット数を集計
+  const heatmapData: Record<BodyPart, Record<string, number>> = {
+    chest: {},
+    back: {},
+    arms: {},
+    shoulders: {},
+    legs: {},
+    core: {},
+  };
+  
+  if (logs) {
+    for (const log of logs) {
+      const exercise = EXERCISES.find(e => e.id === log.exercise_id);
+      if (exercise) {
+        const bodyPart = exercise.bodyPart;
+        const dateStr = log.date;
+        heatmapData[bodyPart][dateStr] = (heatmapData[bodyPart][dateStr] || 0) + log.sets;
+      }
+    }
+  }
+  
+  return heatmapData;
+}
+
+function HeatmapRow({ bodyPart, data }: { bodyPart: BodyPart; data: Record<string, number> }) {
+  const today = new Date();
+  const days = [];
+  
+  // 過去12週間分（84日）を表示
+  for (let i = 83; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split("T")[0];
+    const sets = data[dateStr] || 0;
+    
+    // セット数に応じて透明度を変更
+    const opacity = sets === 0 ? 0.1 : Math.min(sets / 4, 1);
+    
+    days.push(
+      <div
+        key={dateStr}
+        className={`h-3 w-3 rounded-sm ${sets > 0 ? BODY_PART_COLORS[bodyPart] : "bg-gray-700"}`}
+        style={{ opacity: sets > 0 ? opacity : 0.3 }}
+        title={`${dateStr}: ${sets} セット`}
+      />
+    );
+  }
+  
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex items-center gap-2">
+      <span className="w-12 text-sm text-gray-400">{BODY_PARTS[bodyPart]}</span>
+      <div className="flex gap-0.5">{days}</div>
+    </div>
+  );
+}
+
+export default async function Home() {
+  const heatmapData = await getHeatmapData();
+  const displayedBodyParts: BodyPart[] = ["chest", "back", "arms"];
+  
+  return (
+    <div className="min-h-screen bg-gray-950 text-white">
+      <Header />
+      
+      <main className="mx-auto max-w-6xl px-4 py-12">
+        <div className="mb-12 text-center">
+          <h1 className="mb-4 text-4xl font-bold">Training Log</h1>
+          <p className="text-gray-400">筋トレの記録を可視化</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        
+        {/* ヒートマップセクション */}
+        <section className="rounded-2xl border border-white/10 bg-gray-900/50 p-6 backdrop-blur-sm">
+          <h2 className="mb-6 text-xl font-semibold">トレーニング履歴</h2>
+          
+          <div className="space-y-3">
+            {displayedBodyParts.map((bodyPart) => (
+              <HeatmapRow
+                key={bodyPart}
+                bodyPart={bodyPart}
+                data={heatmapData[bodyPart]}
+              />
+            ))}
+          </div>
+          
+          {/* 凡例 */}
+          <div className="mt-6 flex items-center gap-4 text-sm text-gray-400">
+            <span>少ない</span>
+            <div className="flex gap-1">
+              {[0.1, 0.3, 0.5, 0.7, 1].map((opacity) => (
+                <div
+                  key={opacity}
+                  className="h-3 w-3 rounded-sm bg-blue-500"
+                  style={{ opacity }}
+                />
+              ))}
+            </div>
+            <span>多い</span>
+          </div>
+        </section>
       </main>
     </div>
   );
