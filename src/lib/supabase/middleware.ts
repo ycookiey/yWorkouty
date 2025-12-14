@@ -5,32 +5,36 @@ import { NextResponse, type NextRequest } from "next/server";
 const ALLOWED_GITHUB_ID = "70356861";
 
 export async function updateSession(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // ビルド時に環境変数がない場合はスキップ
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        supabaseResponse = NextResponse.next({
+          request,
+        });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
   const {
     data: { user },
@@ -51,7 +55,7 @@ export async function updateSession(request: NextRequest) {
 
     // GitHub IDをチェック（user_metadataからprovider_idを取得）
     const githubId = user.user_metadata?.provider_id?.toString();
-    
+
     if (githubId !== ALLOWED_GITHUB_ID) {
       // 許可されていないユーザーはアクセス拒否
       const url = request.nextUrl.clone();
