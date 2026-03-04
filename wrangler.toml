@@ -2,7 +2,18 @@ name = "yworkouty"
 account_id = "0ae949d229d9cc0aacd580a49bcc15ca"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
 
 # OpenNext output directory
 main = ".open-next/worker.js"
 assets = { directory = ".open-next/assets", binding = "STATIC_ASSETS" }
+
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://kixqlphqmobaqwsubmjv.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpeHFscGhxbW9iYXF3c3VibWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NTg2NDEsImV4cCI6MjA4MDQzNDY0MX0.0X_ymienOEsM54qlTzRbxkM82QF8mEnPkjy8whv9sE0"
+
+# Custom domain route (requires DNS setup in Cloudflare)
+[[routes]]
+pattern = "workout.ycookiey.com/*"
+zone_name = "ycookiey.com"
+
