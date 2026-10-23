@@ -5,7 +5,8 @@ export async function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // ビルド時に環境変数がない場合のフォールバック
+  // Without the env vars, prerendering during the build would throw. The dummy
+  // client lets the build finish; its requests fail.
   if (!supabaseUrl || !supabaseAnonKey) {
     const cookieStore = await cookies();
     return createServerClient(

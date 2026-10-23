@@ -1,14 +1,13 @@
 import { Header } from "@/components/Header";
 import Link from "next/link";
 
-// 知識メモのカテゴリ
 const CATEGORIES = [
   { id: "exercises", name: "種目別", description: "各種目のフォームやポイント" },
   { id: "basics", name: "基礎知識", description: "筋トレの基本的な知識" },
   { id: "nutrition", name: "栄養・休養", description: "食事や休息について" },
 ];
 
-// ダミーの知識メモ（後でSupabaseから取得）
+// TODO: Load published notes from training_knowledge_notes instead of this placeholder list.
 const DUMMY_NOTES = [
   { slug: "bench-press-form", title: "ベンチプレスのフォーム", category: "exercises" },
   { slug: "progressive-overload", title: "漸進性過負荷の原則", category: "basics" },
@@ -23,7 +22,6 @@ export default function KnowledgePage() {
       <main className="mx-auto max-w-4xl px-4 py-12">
         <h1 className="mb-8 text-3xl font-bold">知識メモ</h1>
         
-        {/* カテゴリ別に表示 */}
         <div className="space-y-12">
           {CATEGORIES.map((category) => {
             const notes = DUMMY_NOTES.filter((n) => n.category === category.id);

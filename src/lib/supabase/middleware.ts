@@ -1,14 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// 許可されたGitHub ID
+// Numeric GitHub user ID of the only account allowed to open /record.
 const ALLOWED_GITHUB_ID = "70356861";
 
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // ビルド時に環境変数がない場合はスキップ
+  // Without the env vars there is no session to check, so the route guard below is skipped too.
   if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.next({ request });
   }
@@ -40,24 +40,21 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 保護されたルートへのアクセス制御
   const isProtectedRoute =
     request.nextUrl.pathname.startsWith("/record") ||
     request.nextUrl.pathname.startsWith("/history");
 
   if (isProtectedRoute) {
-    // 未ログインの場合はログインページへ
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url);
     }
 
-    // GitHub IDをチェック（user_metadataからprovider_idを取得）
+    // Supabase stores the GitHub user ID in user_metadata.provider_id.
     const githubId = user.user_metadata?.provider_id?.toString();
 
     if (githubId !== ALLOWED_GITHUB_ID) {
-      // 許可されていないユーザーはアクセス拒否
       const url = request.nextUrl.clone();
       url.pathname = "/";
       url.searchParams.set("error", "unauthorized");
