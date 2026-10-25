@@ -1,6 +1,6 @@
 # yWorkouty
 
-[English](README.md)
+[English README](README.md)
 
 筋トレの記録を付ける1人用のWebアプリ。Next.jsとSupabaseで作り、Cloudflare Workersで動かす。利用者がそれぞれ自分の環境にデプロイして使う。記録できるのは1つのGitHubアカウントだけで、トップページは誰でも閲覧できる。
 

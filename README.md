@@ -1,6 +1,6 @@
 # yWorkouty
 
-[日本語](README.ja.md)
+[日本語版 README](README.ja.md)
 
 A single-user web app for logging strength training, built with Next.js and Supabase to run on Cloudflare Workers. You run your own copy: one GitHub account records workouts, and anyone can view the home page.
 
