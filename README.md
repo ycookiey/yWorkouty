@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# yWorkouty
 
-## Getting Started
+[日本語版 README](README.ja.md)
 
-First, run the development server:
+A single-user web app for logging strength training, built with Next.js and Supabase to run on Cloudflare Workers. You run your own copy: one GitHub account records workouts, and anyone can view the home page.
+
+## Features
+
+- Record the weight (kg), reps and sets of each exercise on `/record` (記録する). The exercises are a fixed list of nine for chest, back and arms in `src/lib/exercises.ts`
+- The home page shows a heatmap of sets per day for chest, back and arms over the last 12 weeks, without signing in
+
+## Setup
+
+Requires Node.js 20 or later, a Supabase project and, for deployment, a Cloudflare account.
+
+1. Install dependencies: `npm ci`
+2. Create the tables. Either run `npx supabase login`, `npx supabase link --project-ref <project-ref>` and `npx supabase db push` to apply `supabase/migrations/`, or paste `supabase/schema.sql` into the Supabase SQL editor
+3. Create a GitHub OAuth App with the callback URL `https://<project-ref>.supabase.co/auth/v1/callback`. In the Supabase dashboard, enable the GitHub auth provider with the app's client ID and secret, and add `<origin>/auth/callback` (for example `http://localhost:3000/auth/callback`) to the allowed redirect URLs
+4. Copy `env.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from your Supabase project's API settings. Both are embedded at build time, so they must be set when you build, not only at runtime
+5. Set `ALLOWED_GITHUB_ID` in `src/lib/supabase/middleware.ts` to your numeric GitHub user ID (`gh api user --jq .id`). Other accounts are sent back to the home page when they open `/record`
+6. Start the dev server with `npm run dev` and open http://localhost:3000
+
+## Deploy to Cloudflare Workers
+
+1. In `wrangler.toml`, change `name` and `account_id`, replace or remove `[[routes]]`, and replace the values in `[vars]` with your own
+2. Sign in with `npx wrangler login`, then run `npm run deploy`. It builds with OpenNext (`npm run build:cf`) and runs `wrangler deploy`
+
+`.github/workflows/deploy.yml` deploys on every push to `main`. It reads the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Set them, or delete the workflow.
+
+## Limitations
+
+- Every record is public: anyone can read all rows of `training_logs` through the Supabase API, and the home page shows the records of every user
+- The GitHub ID check guards only the `/record` page, and it reads `user_metadata`, which signed-in users can change themselves. The database policies let any signed-in user insert, update and delete their own rows through the Supabase API, and those rows appear on the home page
+- Dates are stored as the UTC date at the time of recording
+- The 知識メモ page lists placeholder notes, and their links lead to pages that do not exist
+- The interface is in Japanese
+
+## Build
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run build      # Next.js production build
+npm run build:cf   # Cloudflare Workers bundle in .open-next/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## License
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[MIT](LICENSE)

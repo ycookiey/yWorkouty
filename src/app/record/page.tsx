@@ -52,7 +52,6 @@ export default function RecordPage() {
     } else {
       const exercise = getExerciseById(selectedExercise);
       setMessage({ type: "success", text: `${exercise?.name || selectedExercise} を記録しました！` });
-      // 入力をリセット
       setWeight("");
       setReps("");
       setSets("");
@@ -66,9 +65,6 @@ export default function RecordPage() {
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    
-    // 同じ部位の前回の記録を取得
-    const exerciseIds = getExercisesByBodyPart(selectedBodyPart).map(e => e.id);
     
     const { data, error } = await supabase
       .from("training_logs")
@@ -98,7 +94,6 @@ export default function RecordPage() {
       <main className="mx-auto max-w-2xl px-4 py-12">
         <h1 className="mb-8 text-3xl font-bold">記録する</h1>
         
-        {/* メッセージ表示 */}
         {message && (
           <div
             className={`mb-6 rounded-lg p-4 ${
@@ -112,7 +107,6 @@ export default function RecordPage() {
         )}
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 部位選択 */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-400">
               部位
@@ -137,7 +131,6 @@ export default function RecordPage() {
             </div>
           </div>
           
-          {/* 種目選択 */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-400">
               種目
@@ -155,7 +148,6 @@ export default function RecordPage() {
             </select>
           </div>
           
-          {/* 重量・回数・セット */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-400">
@@ -199,7 +191,6 @@ export default function RecordPage() {
             </div>
           </div>
           
-          {/* アクションボタン */}
           <div className="flex gap-4">
             <button
               type="button"

@@ -1,5 +1,4 @@
-// 種目マスタ（コード内管理）
-// TODO: 将来的に管理画面から種目を編集可能にする
+// TODO: Make exercises editable from an admin page instead of this hard-coded list.
 
 export type BodyPart = "chest" | "back" | "arms" | "shoulders" | "legs" | "core";
 
@@ -19,17 +18,14 @@ export const BODY_PARTS: Record<BodyPart, string> = {
 };
 
 export const EXERCISES: Exercise[] = [
-  // 胸
   { id: "bench-press", name: "ベンチプレス", bodyPart: "chest" },
   { id: "dumbbell-fly", name: "ダンベルフライ", bodyPart: "chest" },
   { id: "chest-press", name: "チェストプレス", bodyPart: "chest" },
   
-  // 背中
   { id: "lat-pulldown", name: "ラットプルダウン", bodyPart: "back" },
   { id: "seated-row", name: "シーテッドロー", bodyPart: "back" },
   { id: "deadlift", name: "デッドリフト", bodyPart: "back" },
   
-  // 腕
   { id: "arm-curl", name: "アームカール", bodyPart: "arms" },
   { id: "triceps-press", name: "トライセプスプレス", bodyPart: "arms" },
   { id: "hammer-curl", name: "ハンマーカール", bodyPart: "arms" },
