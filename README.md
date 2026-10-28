@@ -6,8 +6,7 @@ A single-user web app for logging strength training, built with Next.js and Supa
 
 ## Features
 
-- Record a workout on `/record` (記録する): pick a body part and an exercise, then enter weight (kg), reps and sets. The exercises are a fixed list of nine for chest, back and arms in `src/lib/exercises.ts`
-- The 前回コピー button fills in weight, reps and sets from your latest record of the selected exercise
+- Record the weight (kg), reps and sets of each exercise on `/record` (記録する). The exercises are a fixed list of nine for chest, back and arms in `src/lib/exercises.ts`
 - The home page shows a heatmap of sets per day for chest, back and arms over the last 12 weeks, without signing in
 
 ## Setup
